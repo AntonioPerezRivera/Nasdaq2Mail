@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:twitter="http://www.mulesoft.org/schema/mule/twitter" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.6.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/twitter http://www.mulesoft.org/schema/mule/twitter/current/mule-twitter.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="localhost" port="8081" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration" host="query.yahooapis.com" basePath="v1/public/yql" doc:name="HTTP Request Configuration" />
+    <spring:beans>
+        <spring:bean id="transformador_" name="Bean" class="eventos.Transformador"/>
+    </spring:beans>
+    <flow name="stock_proyectoFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/" method="GET" followRedirects="true" doc:name="HTTP" parseResponse="false">
+            <http:request-builder>
+                <http:query-param paramName="q" value="#[message.inboundProperties.'http.query.params'.q]"/>
+                <http:query-param paramName="env" value="#[message.inboundProperties.'http.query.params'.env]"/>
+                <http:query-param paramName="format" value="#[message.inboundProperties.'http.query.params'.format]"/>
+            </http:request-builder>
+        </http:request>
+        
+        <json:json-to-object-transformer doc:name="JSONtoEventoBolsa"/>
+        <echo-component doc:name="Echo"/>
+        <auto-transformer returnClass="eventos.EventoBolsa" name="JsonDataToEventoBolsa" />
+        <smtp:outbound-endpoint host="hostSMTP" to="toMAIL" from="fromMAIL" subject="[StockApp] Alerta sensores" responseTimeout="10000" doc:name="SMTP" password="uPass" user="uName"/>
+    </flow>
+</mule>
