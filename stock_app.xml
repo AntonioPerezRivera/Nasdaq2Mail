@@ -28,6 +28,6 @@ http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smt
         <json:json-to-object-transformer doc:name="JSONtoEventoBolsa"/>
         <echo-component doc:name="Echo"/>
         <auto-transformer returnClass="eventos.EventoBolsa" name="JsonDataToEventoBolsa" />
-        <smtp:outbound-endpoint host="hostSMTP" to="toMAIL" from="fromMAIL" subject="[StockApp] Alerta sensores" responseTimeout="10000" doc:name="SMTP" password="uPass" user="uName"/>
+        <smtp:outbound-endpoint host="hostSMTP" to="toMAIL" from="fromMAIL" subject="[Nasdaq2Mail] Consulta de valores" responseTimeout="10000" doc:name="SMTP" password="uPass" user="uName"/>
     </flow>
 </mule>
